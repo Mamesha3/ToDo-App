@@ -67,6 +67,16 @@ export const refreshToken = async () => {
     }
 }
 
+export const updateUserProfile = async (data: any) => {
+    try {
+        const res = await axiosInstance.put('/user/profile', data)
+        return res.data
+    } catch (error: any) {
+        const message = error.response?.data?.msg || error.message || 'Profile update failed'
+        throw new Error(message)
+    }
+}
+
 export const addTodo = async (data: any) => {
     try {
         const res = await axiosInstance.post('/todo', data)
