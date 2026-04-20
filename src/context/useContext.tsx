@@ -1,6 +1,6 @@
 "use client"
 import { createContext, useContext, useState } from 'react'
-import { loginUser, registerUser, logoutUser } from '../lib/api'
+import { loginUser, registerUser, logoutUser, refreshToken } from '../lib/api'
 
 type User = {
     id: string;
@@ -14,12 +14,15 @@ type AuthContextType = {
     login: (data: any) => Promise<void>;
     register: (data: any) => Promise<void>;
     logout: () => Promise<void>;
+    refresh: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
+    console.log(user);
+    
 
     const login = async (data: any) => {
         const response = await loginUser(data);
@@ -28,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const register = async (data: any) => {
         const response = await registerUser(data);
-        setUser(response.user);
+        setUser(response.user || response.data);
     };
 
     const logout = async () => {
@@ -36,8 +39,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
     };
 
+    const refresh = async () => {
+        try {
+            const response = await refreshToken();
+            setUser(response.user);
+        } catch (error) {
+            await logout();
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, register, logout }}>
+        <AuthContext.Provider value={{ user, login, register, logout, refresh }}>
             {children}
         </AuthContext.Provider>
     );

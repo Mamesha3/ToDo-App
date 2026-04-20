@@ -2,19 +2,64 @@ import axios from 'axios'
 
 const api = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
 
+const axiosInstance = axios.create({
+    baseURL: api,
+    withCredentials: true
+})
+
+axiosInstance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config
+        
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true
+            try {
+                await axios.post(`${api}/refresh`, {}, { withCredentials: true })
+                return axiosInstance(originalRequest)
+            } catch (refreshError) {
+                window.location.href = '/login'
+                return Promise.reject(refreshError)
+            }
+        }
+        
+        return Promise.reject(error)
+    }
+)
+
 export const registerUser = async (data: any) => {
     try {
-        const res = await axios.post(`${api}/register`, data, { withCredentials: true })
+        const res = await axiosInstance.post('/register', data)
         return res.data
-    } catch (error) {
-        console.log(error)
-        throw error
+    } catch (error: any) {
+        const message = error.response?.data?.msg || error.message || 'Registration failed'
+        throw new Error(message)
     }
 }
 
 export const loginUser = async (data: any) => {
     try {
-        const res = await axios.post(`${api}/login`, data)
+        const res = await axiosInstance.post('/login', data)
+        return res.data
+    } catch (error: any) {
+        const message = error.response?.data?.msg || error.message || 'Login failed'
+        throw new Error(message)
+    }
+}
+
+export const logoutUser = async () => {
+    try {
+        const res = await axiosInstance.post('/logout')
+        return res.data
+    } catch (error: any) {
+        const message = error.response?.data?.msg || error.message || 'Logout failed'
+        throw new Error(message)
+    }
+}
+
+export const refreshToken = async () => {
+    try {
+        const res = await axiosInstance.post('/refresh')
         return res.data
     } catch (error) {
         console.log(error)
@@ -22,18 +67,9 @@ export const loginUser = async (data: any) => {
     }
 }
 
-export const logoutUser = async () => {
-    try {
-        const res = await axios.post(`${api}/logout`)
-        return res.data
-    } catch (error) {
-        console.log(error)
-    }
-}
-
 export const addTodo = async (data: any) => {
     try {
-        const res = await axios.post(`${api}/todo`, data)
+        const res = await axiosInstance.post('/todo', data)
         return res.data
     } catch (error) {
         console.log(error)
@@ -42,7 +78,7 @@ export const addTodo = async (data: any) => {
 
 export const getUserTodo = async () => {
     try {
-        const res = await axios.get(`${api}/todo`, { withCredentials: true })
+        const res = await axiosInstance.get('/todo')
         return res.data
     } catch (error) {
         console.log(error)
@@ -52,7 +88,7 @@ export const getUserTodo = async () => {
 
 export const updateUserTodo = async ({id, data}: {id: any, data: any}) => {
     try {
-        const res = await axios.put(`${api}/todo/${id}`, data)
+        const res = await axiosInstance.put(`/todo/${id}`, data)
         return res.data
     } catch (error) {
         console.log(error)
@@ -61,7 +97,7 @@ export const updateUserTodo = async ({id, data}: {id: any, data: any}) => {
 
 export const todoCompleted = async (id: any) => {
     try {
-        const res = await axios.patch(`${api}/todo/${id}`)
+        const res = await axiosInstance.patch(`/todo/${id}`)
         return res.data
     } catch (error) {
         console.log(error)
@@ -70,7 +106,7 @@ export const todoCompleted = async (id: any) => {
 
 export const deleteTodo = async (id: any) => {
     try {
-        const res = await axios.delete(`${api}/todo/${id}`)
+        const res = await axiosInstance.delete(`/todo/${id}`)
         return res.data
     } catch (error) {
         console.log(error)
