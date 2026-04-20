@@ -3,7 +3,7 @@ import { Providers } from "../component/provider";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import PageTransition from "@/component/PageTransition";
-import Navbar from "../component/navbar";
+import NavbarWrapper from "../component/NavbarWrapper";
 
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang='en' className={cn("font-sans", geist.variable)}>
       <body>
           <Providers>
-          <Navbar />
+          <NavbarWrapper />
             <PageTransition>{children}</PageTransition>
           </Providers>
       </body>

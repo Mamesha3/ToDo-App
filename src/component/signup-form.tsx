@@ -16,11 +16,12 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Eye, EyeOff, CheckCircle2, AlertCircle } from "lucide-react"
+import { Eye, EyeOff, CheckCircle2, AlertCircle, User, Mail, Lock } from "lucide-react"
 import Link from "next/link"
 import { useState, useRef } from "react"
 import { useAuth } from "@/context/useContext"
 import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     const [isShowPass, setShowPass] = useState(false)
@@ -113,101 +114,165 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
     if(isSuccess) {
         return (
-            <Card {...props}>
-                <CardContent className="pt-6">
-                    <Alert className="border-green-500/50 bg-green-500/10">
-                        <CheckCircle2 className="text-green-500" />
-                        <AlertTitle className="text-green-500">Success!</AlertTitle>
-                        <AlertDescription>
-                            User registered successfully. Redirecting to login...
-                        </AlertDescription>
-                    </Alert>
-                </CardContent>
-            </Card>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+            >
+                <Card {...props} className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm">
+                    <CardContent className="pt-6">
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                        >
+                            <Alert className="border-green-500/50 bg-green-500/10">
+                                <CheckCircle2 className="text-green-500" />
+                                <AlertTitle className="text-green-500">Success!</AlertTitle>
+                                <AlertDescription>
+                                    User registered successfully. Redirecting to login...
+                                </AlertDescription>
+                            </Alert>
+                        </motion.div>
+                    </CardContent>
+                </Card>
+            </motion.div>
         )
     }
   
     return (
-    <Card {...props}>
-      <CardHeader>
-        <CardTitle>Create an account</CardTitle>
-        <CardDescription>
-          Enter your information below to create your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSignup}>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="name">Full Name</FieldLabel>
-              <Input id="name" ref={nameRef} type="text" placeholder="John Doe" required />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-                ref={emailRef}
-              />
-              <FieldDescription>
-                We&apos;ll use this to contact you. We will not share your email
-                with anyone else.
-              </FieldDescription>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="password">Password</FieldLabel>
-              {/* <Input id="password" type="password" required /> */}
-              <div className="flex items-center border-1 rounded-lg px-2">
-                    <Input id="password" ref={passwordRef} type={isShowPass ? "text" : "password"} required className="border-0 outline-none focus:outline-none"/>
-                    <span onClick={() => setShowPass(prev => !prev)} className="opacity-30 cursor-pointer">
-                        {isShowPass ? <EyeOff /> : <Eye />}
-                    </span>
-                </div>
-              <FieldDescription>
-                Must be at least 8 characters with uppercase, lowercase, and numbers.
-              </FieldDescription>
-              {passwordError && (
-                <FieldDescription className="text-red-500">{passwordError}</FieldDescription>
-              )}
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="confirm-password">
-                Confirm Password
-              </FieldLabel>
-              {/* <Input id="confirm-password" type="password" required /> */}
-              <div className="flex items-center border-1 rounded-lg px-2">
-                    <Input id="confirm-password" type={isShowConfirmPass ? "text" : "password"} required className="border-0 outline-none focus:outline-none" ref={confirmPasswordRef}/>
-                    <span onClick={() => setShowConfirmPass(prev => !prev)} className="opacity-30 cursor-pointer">
-                        {isShowConfirmPass ? <EyeOff /> : <Eye />}
-                    </span>
-                </div>
-              <FieldDescription>Please confirm your password.</FieldDescription>
-              <FieldDescription className="text-red-500">{isPassMatched}</FieldDescription>
-            </Field>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+    >
+      <Card {...props} className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50 backdrop-blur-sm">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Create an account
+          </CardTitle>
+          <CardDescription className="text-gray-600">
+            Enter your information below to create your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSignup}>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4"
+              >
+                <Alert variant="destructive" className="border-red-500/50 bg-red-500/10">
+                  <AlertCircle />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              </motion.div>
+            )}
             <FieldGroup>
               <Field>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Creating Account..." : "Create Account"}
-                </Button>
-                {/* <Button variant="outline" type="button">
-                  Sign up with Google
-                </Button> */}
-                <FieldDescription className="px-6 text-center">
-                  Already have an account? <Link href="/login">Sign in</Link>
+                <FieldLabel htmlFor="name" className="text-gray-700 font-medium">Full Name</FieldLabel>
+                <div className="flex items-center border border-gray-300 rounded-lg px-3 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all duration-200">
+                  <User className="text-gray-400 mr-3" size={18} />
+                  <Input 
+                    id="name" 
+                    ref={nameRef} 
+                    type="text" 
+                    placeholder="John Doe" 
+                    required 
+                    className="border-0 outline-none focus:outline-none"
+                  />
+                </div>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="email" className="text-gray-700 font-medium">Email</FieldLabel>
+                <div className="flex items-center border border-gray-300 rounded-lg px-3 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all duration-200">
+                  <Mail className="text-gray-400 mr-3" size={18} />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                    ref={emailRef}
+                    className="border-0 outline-none focus:outline-none"
+                  />
+                </div>
+                <FieldDescription className="text-gray-500">
+                  We&apos;ll use this to contact you. We will not share your email
+                  with anyone else.
                 </FieldDescription>
               </Field>
+              <Field>
+                <FieldLabel htmlFor="password" className="text-gray-700 font-medium">Password</FieldLabel>
+                <div className="flex items-center border border-gray-300 rounded-lg px-3 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all duration-200">
+                    <Lock className="text-gray-400 mr-3" size={18} />
+                    <Input id="password" ref={passwordRef} type={isShowPass ? "text" : "password"} placeholder="Create a password" required className="border-0 outline-none focus:outline-none"/>
+                    <span onClick={() => setShowPass(prev => !prev)} className="text-gray-500 hover:text-gray-700 cursor-pointer transition-colors">
+                        {isShowPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </span>
+                </div>
+                <FieldDescription className="text-gray-500">
+                  Must be at least 8 characters with uppercase, lowercase, and numbers.
+                </FieldDescription>
+                {passwordError && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                  >
+                    <FieldDescription className="text-red-500">{passwordError}</FieldDescription>
+                  </motion.div>
+                )}
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="confirm-password" className="text-gray-700 font-medium">
+                  Confirm Password
+                </FieldLabel>
+                <div className="flex items-center border border-gray-300 rounded-lg px-3 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all duration-200">
+                    <Lock className="text-gray-400 mr-3" size={18} />
+                    <Input id="confirm-password" type={isShowConfirmPass ? "text" : "password"} placeholder="Confirm your password" required className="border-0 outline-none focus:outline-none" ref={confirmPasswordRef}/>
+                    <span onClick={() => setShowConfirmPass(prev => !prev)} className="text-gray-500 hover:text-gray-700 cursor-pointer transition-colors">
+                        {isShowConfirmPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </span>
+                </div>
+                <FieldDescription className="text-gray-500">Please confirm your password.</FieldDescription>
+                {isPassMatched && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                  >
+                    <FieldDescription className="text-red-500">{isPassMatched}</FieldDescription>
+                  </motion.div>
+                )}
+              </Field>
+              <FieldGroup>
+                <Field>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button 
+                      type="submit" 
+                      disabled={isLoading}
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                    >
+                      {isLoading ? "Creating Account..." : "Create Account"}
+                    </Button>
+                  </motion.div>
+                  {/* <Button variant="outline" type="button">
+                    Sign up with Google
+                  </Button> */}
+                  <FieldDescription className="px-6 text-center text-gray-600">
+                    Already have an account?{" "}
+                    <Link href="/login" className="text-purple-600 hover:text-purple-700 font-medium transition-colors">
+                      Sign in
+                    </Link>
+                  </FieldDescription>
+                </Field>
+              </FieldGroup>
             </FieldGroup>
-          </FieldGroup>
-        </form>
-      </CardContent>
-    </Card>
+          </form>
+        </CardContent>
+      </Card>
+    </motion.div>
   )
 }

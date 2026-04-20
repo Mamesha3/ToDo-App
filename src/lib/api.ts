@@ -12,13 +12,19 @@ axiosInstance.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config
         
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Skip refresh for logout requests or if explicitly marked via header
+        if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.headers['skip-auth-refresh']) {
             originalRequest._retry = true
             try {
                 await axios.post(`${api}/refresh`, {}, { withCredentials: true })
                 return axiosInstance(originalRequest)
             } catch (refreshError) {
-                window.location.href = '/login'
+                // Only redirect if not already on login or signup page
+                if (typeof window !== 'undefined' && 
+                    window.location.pathname !== '/login' && 
+                    window.location.pathname !== '/signup') {
+                    window.location.href = '/login'
+                }
                 return Promise.reject(refreshError)
             }
         }
@@ -49,9 +55,15 @@ export const loginUser = async (data: any) => {
 
 export const logoutUser = async () => {
     try {
-        const res = await axiosInstance.post('/logout')
+        const res = await axiosInstance.post('/logout', {}, { 
+            headers: { 'skip-auth-refresh': 'true' } 
+        })
         return res.data
     } catch (error: any) {
+        // Don't throw error on 401 during logout - token invalidation is expected
+        if (error.response?.status === 401) {
+            return { success: true }
+        }
         const message = error.response?.data?.msg || error.message || 'Logout failed'
         throw new Error(message)
     }
@@ -59,7 +71,9 @@ export const logoutUser = async () => {
 
 export const refreshToken = async () => {
     try {
-        const res = await axiosInstance.post('/refresh')
+        const res = await axiosInstance.post('/refresh', {}, { 
+            headers: { 'skip-auth-refresh': 'true' } 
+        })
         return res.data
     } catch (error) {
         console.log(error)

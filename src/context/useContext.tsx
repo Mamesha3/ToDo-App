@@ -1,5 +1,6 @@
 "use client"
 import { createContext, useContext, useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { loginUser, registerUser, logoutUser, refreshToken } from '../lib/api'
 
 type User = {
@@ -23,66 +24,43 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
-        // Restore user from localStorage on mount
-        const storedUser = localStorage.getItem('user');
-        const storedToken = localStorage.getItem('token');
-        
-        if (storedUser && storedToken) {
-            try {
-                setUser(JSON.parse(storedUser));
-                // Validate token by refreshing
-                refreshToken().then(response => {
-                    setUser(response.user);
-                }).catch(() => {
-                    // Token invalid, clear storage
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('token');
-                    setUser(null);
-                }).finally(() => {
-                    setIsLoaded(true);
-                });
-            } catch (error) {
-                localStorage.removeItem('user');
-                localStorage.removeItem('token');
-                setIsLoaded(true);
-            }
-        } else {
+        // Validate session on mount using cookies
+        refreshToken().then(response => {
+            setUser(response.user);
+        }).catch(() => {
+            setUser(null);
+        }).finally(() => {
             setIsLoaded(true);
-        }
+        });
     }, []);
 
     const login = async (data: any) => {
         const response = await loginUser(data);
         setUser(response.user);
-        localStorage.setItem('user', JSON.stringify(response.user));
-        if (response.token) {
-            localStorage.setItem('token', response.token);
-        }
     };
 
     const register = async (data: any) => {
         const response = await registerUser(data);
         setUser(response.user || response.data);
-        localStorage.setItem('user', JSON.stringify(response.user || response.data));
-        if (response.token) {
-            localStorage.setItem('token', response.token);
-        }
     };
 
     const logout = async () => {
-        await logoutUser();
+        try {
+            await logoutUser();
+        } catch (error) {
+            console.error('Logout API call failed, but clearing local state:', error);
+        }
         setUser(null);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        router.push('/login');
     };
 
     const refresh = async () => {
         try {
             const response = await refreshToken();
             setUser(response.user);
-            localStorage.setItem('user', JSON.stringify(response.user));
         } catch (error) {
             await logout();
         }
@@ -90,7 +68,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const updateUser = (updatedUser: User) => {
         setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
     };
 
     if (!isLoaded) {

@@ -171,7 +171,6 @@ export default function TodoList() {
               ))}
 
               {data.todo.length < 5 && <div onClick={() => setIsAdding(prev => !prev)} className='flex flex-col items-center select-none shadow-lg border-1 mb-5 active:scale-95 p-2 rounded-3xl cursor-pointer'>
-                    <div className='text-red-500 text-center font-black italic text-2xl'>No Data Found</div>
                     {/*  add todo */}
                     <div className="flex flex-col items-center justify-center opacity-50 cursor-pointer mt-5">
                         <span className='text-5xl font-bold'>+</span>
