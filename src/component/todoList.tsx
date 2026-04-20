@@ -17,25 +17,36 @@ export default function TodoList() {
     
 
     if(isLoading) {
-        return <Card className='shadow-lg rounded-lg w-40 px-8 flex justify-center border-0 flex-col items-center gap-2 absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2'>
-          <CardTitle className='font-semibold'>
-             Loding..
-          </CardTitle>
-          <CardContent>
-             <div className="w-5 h-5 opacity-60b bg-black opacity-40 rounded-full animate-bounce"></div>
-          </CardContent>
-        </Card>
+        return (
+            <>
+                {isAdding && <AddToDo setIsAdding={setIsAdding} />}
+                <Card className='shadow-lg rounded-lg w-40 px-8 flex justify-center border-0 flex-col items-center gap-2 absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2'>
+                  <CardTitle className='font-semibold'>
+                     Loding..
+                  </CardTitle>
+                  <CardContent>
+                     <div className="w-5 h-5 opacity-60b bg-black opacity-40 rounded-full animate-bounce"></div>
+                  </CardContent>
+                </Card>
+            </>
+        )
     }
 
-    if(!data || data.todo.length === 0) {
-        return <Card className='shadow-lg rounded-lg w-80 px-8 border-0 absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2'>
-          <CardTitle className='font-semibold capitalize text-2xl flex justify-center items-center'>
-             No todos found
-          </CardTitle>
-          {/* <CardContent>
-             <div className="w-5 h-5 opacity-60b bg-black opacity-40 rounded-full animate-bounce"></div>
-          </CardContent> */}
-        </Card>
+    if(!data || !data?.todo || data.todo.length === 0) {
+        return (
+            <>
+                {isAdding && <AddToDo setIsAdding={setIsAdding} />}
+                <Card className='shadow-lg rounded-lg w-80 px-8 border-0 absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2'>
+                  <CardTitle className='font-semibold capitalize text-2xl flex justify-center items-center'>
+                     No todos found
+                  </CardTitle>
+                  <CardFooter onClick={() => setIsAdding(true)} className='opacity-60 cursor-pointer bg-transparent flex flex-col gap-1 '>
+                    <span className='text-3xl font-bold'>+</span>
+                    <h3 className='text-lg font-semibold'>Add Todo</h3>
+                  </CardFooter>
+                </Card>
+            </>
+        )
     }
 
     return (
