@@ -18,7 +18,7 @@ export default function Home() {
   
   return (
     <>
-    <Navbar />
+    {/* <Navbar /> */}
      <div>
         <TodoList />
      </div>

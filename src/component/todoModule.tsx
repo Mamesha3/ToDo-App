@@ -8,7 +8,7 @@ import { useAddTodo, useUpdateTodo } from '@/hooks/todoHook'
 import { useRef, useEffect } from "react"
 
 
-export default function AddToDo({ setIsAdding, todoD }: { setIsAdding: (value: boolean) => void; todoD?: any }) {
+export default function AddToDo({ setIsAdding, todoD, seteTodoD }: { setIsAdding: (value: boolean) => void; todoD?: any; seteTodoD?: (value: any) => void }) {
     const { mutate: addTodo } = useAddTodo()
     const { mutate: updateTodo } = useUpdateTodo()
     const titleRef = useRef<HTMLInputElement>(null)
@@ -46,11 +46,11 @@ export default function AddToDo({ setIsAdding, todoD }: { setIsAdding: (value: b
 
     return (
         <>
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsAdding(false)}>
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => {setIsAdding(false); seteTodoD?.(null)}}>
             <div className="rounded-2xl p-4 bg-white shadow-lg flex flex-col gap-4 w-96" onClick={(e) => e.stopPropagation()}>
                <div className="flex items-center justify-between">
                 <h2>{isEditMode ? 'Edit Todo' : 'Add Todo'}</h2>
-                <Button title="close" variant="ghost" className="cursor-pointer" size="icon" onClick={() => setIsAdding(false)}>
+                <Button title="close" variant="ghost" className="cursor-pointer" size="icon" onClick={() => {setIsAdding(false); seteTodoD?.(null)}}>
                   <X />
                 </Button>
                </div>
