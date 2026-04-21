@@ -111,7 +111,7 @@ export default function ProfilePage() {
                     </div>
                 </div>
             )}
-            <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-4">
+            <div className="min-h-screen bg-slate-50 pt-5 md:pt-24 pb-12 px-4">
                 <div className="max-w-2xl mx-auto space-y-6">
                 {/* Profile Header */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
