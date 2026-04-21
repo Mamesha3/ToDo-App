@@ -136,3 +136,33 @@ export const deleteTodo = async (id: any) => {
         console.log(error)
     }
 }
+
+export const getMessages = async (receiverId: string) => {
+    try {
+        const res = await axiosInstance.get(`/messages/${receiverId}`)
+        return res.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
+export const getConversations = async () => {
+    try {
+        const res = await axiosInstance.get('/conversations')
+        return res.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
+export const getUsers = async () => {
+    try {
+        const res = await axiosInstance.get('/users')
+        return res.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}

@@ -84,7 +84,7 @@ export default function TodoList() {
     }
 
     return (
-        <div className='mt-25'>
+        <div className=''>
             {isAdding && <AddToDo setIsAdding={setIsAdding} seteTodoD={setTodoData} todoD={todoData} />}
             <motion.div
               className={`mt-10 px-4 mx-auto grid sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl`}
@@ -183,7 +183,7 @@ export default function TodoList() {
 
            {/* if todo length show rounded button at bottom-8 rigth-5 */}
            {data.todo.length >= 5 && (
-            <div className='w-10 h-10 rounded-full fixed bottom-8 right-5 bg-green-500 text-white font-bold sm:hidden'>
+            <div title='add todo' className='w-10 h-10 rounded-full fixed bottom-20 right-5 bg-green-500 text-white font-bold sm:hidden'>
               <Button
                 variant='default'
                 className='w-full h-full rounded-full px-3 py-1 cursor-pointer active:scale-95 transition-all duration-150'
