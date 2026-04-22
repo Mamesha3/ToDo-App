@@ -5,13 +5,14 @@ import Navbar from "../component/navbar";
 import TodoList from "../component/todoList";
 import { useAuth } from "@/context/useContext";
 import { useRouter } from "next/navigation";
-import { useGetUserTodo } from "../hooks/todoHook";
+import { useGetUserTodo, useGetSharedTodos } from "../hooks/todoHook";
 import { motion } from "framer-motion";
 
 export default function Home() {
   const { user, refresh } = useAuth()
   const router = useRouter()
-  const { data: todoData } = useGetUserTodo()
+  const { data: todoData } = useGetUserTodo(user)
+  const { data: sharedData } = useGetSharedTodos(user)
 
   useEffect(() => {
     if(!user) {
@@ -19,8 +20,9 @@ export default function Home() {
     }
   }, [])
 
-  const todoCount = todoData?.todo?.length || 0
-  const completedCount = todoData?.todo?.filter((t: any) => t.completed).length || 0
+  const allTodos = [...(todoData?.todo || []), ...(sharedData?.sharedTodos || [])]
+  const todoCount = allTodos.length || 0
+  const completedCount = allTodos.filter((t: any) => t.completed).length || 0
 
   return (
     <>

@@ -128,3 +128,34 @@
     @apply font-sans;
   }
 }
+
+/* React-datepicker clear button alignment */
+.react-datepicker-wrapper {
+  display: block;
+  width: 100%;
+}
+
+.react-datepicker__input-container {
+  position: relative;
+}
+
+.react-datepicker__close-button {
+  position: absolute !important;
+  top: 50% !important;
+  right: 8px !important;
+  transform: translateY(-50%) !important;
+  padding: 4px !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.react-datepicker__close-button::after {
+  background-color: #6b7280 !important;
+  border-radius: 50% !important;
+  width: 16px !important;
+  height: 16px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+}

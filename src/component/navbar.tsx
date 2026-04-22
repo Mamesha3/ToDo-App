@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { LogOut, UserPen, Home, MessageSquare } from "lucide-react";
+import { LogOut, UserPen, Home, MessageSquare, MessageCirclePlus } from "lucide-react";
 import { useAuth } from "@/context/useContext";
 import { motion } from "framer-motion";
 
@@ -15,7 +15,7 @@ export default function Navbar() {
     <>
       {/* Desktop Top Navbar */}
       <div className="hidden md:flex fixed top-0 z-10 w-full p-4 items-center justify-between bg-green-400 text-amber-50">
-        <h1 className="text-3xl font-bold text-slate-300 text-shadow-2xs">
+        <h1 onClick={() => router.push('/')} className="cursor-pointer text-3xl font-bold text-slate-300 text-shadow-2xs">
           <span className="italic text-2xl text-slate-400">M</span>Studio
         </h1>
 
@@ -58,6 +58,14 @@ export default function Navbar() {
           >
             <MessageSquare className="w-6 h-6" />
             <span className="text-xs">Messages</span>
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => router.push('/add')}
+            className={`cursor-pointer flex flex-col items-center gap-1 ${pathname === '/add' ? 'text-blue-500' : 'text-gray-500'}`}
+          >
+            <MessageCirclePlus className="w-6 h-6" />
+            <span className="text-xs">add todo</span>
           </motion.button>
           <motion.button
             whileTap={{ scale: 0.9 }}

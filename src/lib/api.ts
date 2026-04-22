@@ -166,3 +166,43 @@ export const getUsers = async () => {
         throw error
     }
 }
+
+export const shareTodo = async (todoId: number, userId: number) => {
+    try {
+        const res = await axiosInstance.post(`/todo/${todoId}/share`, { userId })
+        return res.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
+export const unshareTodo = async (todoId: number, userId: number) => {
+    try {
+        const res = await axiosInstance.delete(`/todo/${todoId}/share/${userId}`)
+        return res.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
+export const getSharedTodos = async () => {
+    try {
+        const res = await axiosInstance.get('/todo/shared-with-me')
+        return res.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
+export const getDueTodos = async () => {
+    try {
+        const res = await axiosInstance.get('/todo/due')
+        return res.data
+    } catch (error) {
+        console.log(error)
+        throw error
+    }
+}

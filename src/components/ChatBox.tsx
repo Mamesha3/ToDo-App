@@ -106,7 +106,7 @@ export default function ChatBox({ receiverId, receiverName, onBack }: { receiver
             <motion.div
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="border-b border-gray-200/50 p-4 bg-gradient-to-r from-white to-blue-50/30 backdrop-blur-sm shadow-sm"
+                className="sm:mt-17 border-b border-gray-200/50 p-4 bg-gradient-to-r from-white to-blue-50/30 backdrop-blur-sm shadow-sm"
             >
                 <div className="flex items-center gap-3">
                     {onBack && (
@@ -192,7 +192,7 @@ export default function ChatBox({ receiverId, receiverName, onBack }: { receiver
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="border-t border-gray-200/50 p-4 bg-white/80 backdrop-blur-sm"
+                className="sm:h-10 border-t border-gray-200/50 p-4 bg-white/80 backdrop-blur-sm"
             >
                 <div className="flex gap-3 items-center">
                     <input

@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 
 const pageVariants = {
-  initial: { opacity: 0, scale: 0.8 },
-  enter: { opacity: 1, scale: 1 },
-  // exit: { opacity: 0, x: 20, scale: 0.95 }
+  initial: { opacity: 0},
+  enter: { opacity: 1},
+  // exit: { opacity: 1}
 }
 
 const pageTransition = {

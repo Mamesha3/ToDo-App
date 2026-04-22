@@ -53,7 +53,7 @@ export default function ConversationList({
             <motion.div
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="border-b border-gray-200/50 p-4 bg-white/80 backdrop-blur-sm"
+                className="sm:mt-17 border-b border-gray-200/50 p-4 bg-white/80 backdrop-blur-sm"
             >
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="font-bold text-xl text-gray-800">Messages</h2>

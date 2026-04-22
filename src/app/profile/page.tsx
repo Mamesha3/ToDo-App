@@ -1,7 +1,7 @@
 "use client"
 
 import { useAuth } from '@/context/useContext'
-import { useGetUserTodo } from '@/hooks/todoHook'
+import { useGetUserTodo, useGetSharedTodos } from '@/hooks/todoHook'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { User, Mail, CheckCircle, Clock, LogOut, X } from 'lucide-react'
@@ -12,7 +12,8 @@ import { updateUserProfile } from '@/lib/api'
 
 export default function ProfilePage() {
     const { user, logout, refresh, updateUser } = useAuth()
-    const { data, isLoading } = useGetUserTodo()
+    const { data, isLoading } = useGetUserTodo(user)
+    const { data: sharedData } = useGetSharedTodos(user)
     const router = useRouter()
     const [isEditing, setIsEditing] = useState(false)
     const nameRef = useRef<HTMLInputElement>(null)
@@ -59,8 +60,9 @@ export default function ProfilePage() {
         setIsEditing(true)
     }
 
-    const totalTodos = data?.todo?.length || 0
-    const completedTodos = data?.todo?.filter((todo: any) => todo.completed)?.length || 0
+    const allTodos = [...(data?.todo || []), ...(sharedData?.sharedTodos || [])]
+    const totalTodos = allTodos.length || 0
+    const completedTodos = allTodos.filter((todo: any) => todo.completed)?.length || 0
     const pendingTodos = totalTodos - completedTodos
     const completionRate = totalTodos > 0 ? Math.round((completedTodos / totalTodos) * 100) : 0
 
