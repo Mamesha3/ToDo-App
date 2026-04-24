@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.error('Logout API call failed, but clearing local state:', error);
         }
         setUser(null);
-        router.push('/login');
+        router.push('/guest');
     };
 
     const refresh = async () => {
