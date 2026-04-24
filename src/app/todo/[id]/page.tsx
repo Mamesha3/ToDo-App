@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Save, Edit2, CheckCircle, Clock, Users, Share2, UserMinus, Trash2, MoreVertical, X, XCircle, Bold, Italic, Underline, List, ListOrdered } from 'lucide-react'
+import { ArrowLeft, Save, Edit2, CheckCircle, Clock, Users, Share2, UserMinus, Trash2, MoreVertical, X, XCircle, Bold, Italic, Underline, List, ListOrdered, Sparkles } from 'lucide-react'
 import { useGetUserTodo, useGetSharedTodos, useUpdateTodo, useDeleteTodo, useShareTodo, useUnshareTodo } from '@/hooks/todoHook'
 import { useAuth } from '@/context/useContext'
 import { getUsers } from '@/lib/api'
@@ -14,6 +14,7 @@ import "react-datepicker/dist/react-datepicker.css"
 export default function TodoDetailPage() {
     const { id } = useParams()
     const router = useRouter()
+    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
     const { user } = useAuth()
     const { data } = useGetUserTodo(user)
     const { data: sharedData } = useGetSharedTodos(user)
@@ -22,7 +23,7 @@ export default function TodoDetailPage() {
     const { mutate: shareTodo } = useShareTodo(user)
     const { mutate: unshareTodo } = useUnshareTodo(user)
 
-    const [isEditing, setIsEditing] = useState(false)
+    const [isEditing, setIsEditing] = useState(searchParams.get('edit') === 'true')
     const [showShareModal, setShowShareModal] = useState(false)
     const [showUnshareModal, setShowUnshareModal] = useState(false)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -40,6 +41,88 @@ export default function TodoDetailPage() {
 
     const allTodos = [...(data?.todo || []), ...(sharedData?.sharedTodos || [])]
     const todo = allTodos.find((t: any) => String(t.id) === id)
+
+    // Simple markdown parser to format AI-generated content
+    function parseMarkdown(text: string): string {
+        if (!text) return ''
+        
+        let html = text
+        
+        // Convert bold: **text** to <strong>text</strong>
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        
+        // Convert headers: **Header**: to <h3>Header</h3>
+        html = html.replace(/\*\*(.*?)\*\*:/g, '<h3 class="text-xl font-semibold mt-6 mb-3">$1</h3>')
+        
+        // Convert numbered lists (including nested like 1.1, 1.2)
+        const lines = html.split('\n')
+        let result = ''
+        let inNumberedList = false
+        let inBulletList = false
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i]
+            const trimmedLine = line.trim()
+            
+            // Check for numbered list (1., 1.1, 2., etc.)
+            if (/^\d+(\.\d+)*\./.test(trimmedLine)) {
+                if (inBulletList) {
+                    result += '</ul>'
+                    inBulletList = false
+                }
+                if (!inNumberedList) {
+                    result += '<ol class="list-decimal list-inside my-3 space-y-2">'
+                    inNumberedList = true
+                }
+                const content = trimmedLine.replace(/^\d+(\.\d+)*\.\s*/, '')
+                // Check if it's a sub-item (has decimal like 1.1)
+                const isSubItem = /^\d+\.\d+\./.test(trimmedLine)
+                if (isSubItem) {
+                    result += `<li class="ml-6">${content}</li>`
+                } else {
+                    result += `<li>${content}</li>`
+                }
+            }
+            // Check for bullet points
+            else if (/^-\s/.test(trimmedLine)) {
+                if (inNumberedList) {
+                    result += '</ol>'
+                    inNumberedList = false
+                }
+                if (!inBulletList) {
+                    result += '<ul class="list-disc list-inside my-3 space-y-1">'
+                    inBulletList = true
+                }
+                result += `<li>${trimmedLine.replace(/^-\s*/, '')}</li>`
+            }
+            // Regular text
+            else {
+                if (inNumberedList) {
+                    result += '</ol>'
+                    inNumberedList = false
+                }
+                if (inBulletList) {
+                    result += '</ul>'
+                    inBulletList = false
+                }
+                if (trimmedLine) {
+                    result += `<p class="my-2">${trimmedLine}</p>`
+                }
+            }
+        }
+        
+        // Close any open lists
+        if (inNumberedList) {
+            result += '</ol>'
+        }
+        if (inBulletList) {
+            result += '</ul>'
+        }
+        
+        html = result
+        
+        return html
+    }
 
     useEffect(() => {
         if (todo) {
@@ -92,7 +175,7 @@ export default function TodoDetailPage() {
 
     useEffect(() => {
         if (isEditing && contentRef.current) {
-            contentRef.current.innerHTML = content
+            contentRef.current.innerHTML = parseMarkdown(content)
             contentRef.current.focus()
         }
         if (isEditing && titleRef.current) {
@@ -267,8 +350,15 @@ export default function TodoDetailPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="bg-white rounded-2xl shadow-xl border border-slate-200/50 overflow-hidden"
+                    className={`bg-white rounded-2xl shadow-xl border overflow-hidden ${todo.isSmart ? 'border-2 border-green-500 bg-gradient-to-br from-green-50 to-white' : 'border-slate-200/50'}`}
                 >
+                    {todo.isSmart && (
+                        <div className="absolute top-4 right-4">
+                            <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg" title="AI Generated">
+                                <Sparkles className="w-5 h-5 text-white" />
+                            </div>
+                        </div>
+                    )}
                     {/* Status Bar */}
                     <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-8 py-4 border-b border-slate-200">
                         <div className="flex items-center justify-between">
@@ -418,10 +508,9 @@ export default function TodoDetailPage() {
                                 />
                             </>
                         ) : (
-                            <div 
+                            <div
                                 className="text-lg leading-relaxed text-slate-700 font-light mb-8"
-                                dangerouslySetInnerHTML={{ __html: todo.content }}
-                                style={{ whiteSpace: 'pre-wrap' }}
+                                dangerouslySetInnerHTML={{ __html: parseMarkdown(todo.content) }}
                             />
                         )}
 

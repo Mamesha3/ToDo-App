@@ -16,7 +16,7 @@ export default function Home() {
 
   useEffect(() => {
     if(!user) {
-      refresh().catch(() => router.push('/login'))
+      refresh().catch(() => router.push('/guest'))
     }
   }, [])
 

@@ -1,19 +1,33 @@
 "use client"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useAuth } from '../../context/useContext'
 import ConversationList from '../../components/ConversationList'
 import ChatBox from '../../components/ChatBox'
+import AIChatBox from '../../components/AIChatBox'
 import { motion } from 'framer-motion'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, Bot, Users } from 'lucide-react'
 
 export default function MessagesPage() {
+    const searchParams = useSearchParams()
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
     const [selectedUserName, setSelectedUserName] = useState<string>('')
+    const [chatMode, setChatMode] = useState<'user' | 'ai'>('user')
     const { user } = useAuth()
+
+    // Check URL parameter for AI mode
+    useEffect(() => {
+        const mode = searchParams.get('mode')
+        if (mode === 'ai') {
+            setChatMode('ai')
+            setSelectedUserId(null)
+        }
+    }, [searchParams])
 
     const handleSelectConversation = (userId: string, userName: string) => {
         setSelectedUserId(userId)
         setSelectedUserName(userName)
+        setChatMode('user')
     }
 
     if (!user) {
@@ -33,19 +47,70 @@ export default function MessagesPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="h-[calc(100vh-70px)] md:h-[calc(100vh-64px)] flex"
+            className="h-[calc(100vh-70px)] md:h-[calc(100vh-64px)] flex sm:20"
         >
-            {/* Conversation List - Hidden on mobile when chat is open */}
+            {/* Sidebar - Conversation List or AI Mode */}
             <motion.div
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
-                className={`w-80 border-r bg-white/50 backdrop-blur-sm ${selectedUserId ? 'hidden md:block' : 'block'}`}
+                className={`w-80 border-r bg-white/50 backdrop-blur-sm flex flex-col ${selectedUserId || chatMode === 'ai' ? 'hidden md:flex' : 'flex'}`}
             >
-                <ConversationList
-                    selectedUserId={selectedUserId}
-                    onSelectConversation={handleSelectConversation}
-                />
+                {/* Chat Mode Toggle */}
+                <div className="p-4 border-b bg-white/80 sm:mt-18">
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setChatMode('user')}
+                            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                                chatMode === 'user'
+                                    ? 'bg-blue-500 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            <Users className="w-4 h-4" />
+                            <span className="text-sm font-medium">Users</span>
+                        </button>
+                        <button
+                            onClick={() => {
+                                setChatMode('ai')
+                                setSelectedUserId(null)
+                            }}
+                            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                                chatMode === 'ai'
+                                    ? 'bg-purple-500 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            <Bot className="w-4 h-4" />
+                            <span className="text-sm font-medium">AI Chat</span>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Conversation List - Only show in user mode */}
+                {chatMode === 'user' && (
+                    <ConversationList
+                        selectedUserId={selectedUserId}
+                        onSelectConversation={handleSelectConversation}
+                    />
+                )}
+
+                {/* AI Mode Info */}
+                {chatMode === 'ai' && (
+                    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ duration: 0.5, type: "spring" }}
+                            className="mb-4"
+                        >
+                            <Bot className="w-16 h-16 text-purple-400" />
+                        </motion.div>
+                        <p className="text-gray-600 text-sm">
+                            Chat with AI assistant for help with your todos and tasks
+                        </p>
+                    </div>
+                )}
             </motion.div>
 
             {/* Chat Area */}
@@ -53,9 +118,11 @@ export default function MessagesPage() {
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ duration: 0.3, delay: 0.2 }}
-                className={`flex-1 ${!selectedUserId ? 'hidden md:flex' : 'flex'}`}
+                className={`flex-1 ${!selectedUserId && chatMode !== 'ai' ? 'hidden md:flex' : 'flex'}`}
             >
-                {selectedUserId ? (
+                {chatMode === 'ai' ? (
+                    <AIChatBox onBack={() => setChatMode('user')} />
+                ) : selectedUserId ? (
                     <ChatBox
                         receiverId={selectedUserId}
                         receiverName={selectedUserName}

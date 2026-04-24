@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect, useMemo } from 'react'
-import { useGetUserTodo, useTodoCompleted, useDeleteTodo, useShareTodo, useUnshareTodo, useGetSharedTodos } from '@/hooks/todoHook'
+import { useGetUserTodo, useTodoCompleted, useDeleteTodo, useShareTodo, useUnshareTodo, useGetSharedTodos, useAddTodo } from '@/hooks/todoHook'
 import { getUsers } from '@/lib/api'
 import AddToDo from './todoModule'
 import { Card, CardContent, CardFooter, CardTitle} from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { ClipboardClock, CloudCheck, Delete, EllipsisVertical, FilePenLine, X, Share2, Users, UserMinus, Eye, FilePlus, Clock } from 'lucide-react'
+import { ClipboardClock, CloudCheck, Delete, EllipsisVertical, FilePenLine, X, Share2, Users, UserMinus, Eye, FilePlus, Clock, ArrowRight, Plus, Columns3Cog, Sparkles } from 'lucide-react'
 import { useAuth } from '@/context/useContext'
 import { useRouter } from 'next/navigation'
 
@@ -20,15 +20,21 @@ export default function TodoList() {
     const deleteTodo = useDeleteTodo(user)
     const shareTodo = useShareTodo(user)
     const unshareTodo = useUnshareTodo(user)
+    const { mutate: addTodo } = useAddTodo(user)
     const [isAdding, setIsAdding] = useState(false)
     const [selectedTodo, setSelectedTodo] = useState<string | null>(null)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
     const [showShareModal, setShowShareModal] = useState<string | null>(null)
     const [showUnshareModal, setShowUnshareModal] = useState<string | null>(null)
+    const [showSmartTodoModal, setShowSmartTodoModal] = useState(false)
+    const [smartTodoGoal, setSmartTodoGoal] = useState('')
+    const [isGeneratingTodos, setIsGeneratingTodos] = useState(false)
+    const [showOptionsModal, setShowOptionsModal] = useState(false)
     const [users, setUsers] = useState<any[]>([])
-    const [filter, setFilter] = useState<'all' | 'created' | 'shared'>('all')
+    const [filter, setFilter] = useState<'all' | 'created' | 'shared' | 'smart'>('all')
     const [todoData, setTodoData] = useState<any | null>(null)
     const [timeRemaining, setTimeRemaining] = useState<Record<number, string>>({})
+    const [selectedTodos, setSelectedTodos] = useState<Set<number>>(new Set())
     const MotionButton = motion(Button)
 
     const containerVariants = {
@@ -56,9 +62,14 @@ export default function TodoList() {
     function handleEdit(data: any) {
       setSelectedTodo(null)
       setShowDeleteConfirm(null)
-      setIsAdding(true)
-
-      setTodoData(data)
+      
+      // If it's an AI-generated todo, redirect to todo[id] page
+      if (data.isSmart) {
+        router.push(`/todo/${data.id}`)
+      } else {
+        setIsAdding(true)
+        setTodoData(data)
+      }
     }
 
     async function handleOpenShareModal(todoId: string) {
@@ -88,6 +99,98 @@ export default function TodoList() {
       setShowUnshareModal(null)
     }
 
+    async function handleGenerateSmartTodos() {
+      if (!smartTodoGoal.trim()) return
+
+      setIsGeneratingTodos(true)
+      try {
+        const response = await fetch('http://localhost:5000/api/todo/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ goal: smartTodoGoal })
+        })
+
+        const data = await response.json()
+
+        if (response.status === 429) {
+          alert(data.msg || 'You reached your todays limit')
+          return
+        }
+
+        if (data.todos && Array.isArray(data.todos)) {
+          // Redirect to review page with generated todos
+          const todosParam = encodeURIComponent(JSON.stringify(data.todos))
+          router.push(`/smart-todos?todos=${todosParam}`)
+          setShowSmartTodoModal(false)
+          setSmartTodoGoal('')
+        }
+      } catch (error) {
+        console.error('Error generating todos:', error)
+      } finally {
+        setIsGeneratingTodos(false)
+      }
+    }
+
+    async function handleGenerateSpecialTodo() {
+      if (!smartTodoGoal.trim()) return
+
+      setIsGeneratingTodos(true)
+      try {
+        const response = await fetch('http://localhost:5000/api/todo/generate-special', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ goal: smartTodoGoal })
+        })
+
+        const data = await response.json()
+
+        if (response.status === 429) {
+          alert(data.msg || 'You reached your todays limit')
+          return
+        }
+
+        if (data.title && data.content) {
+          // Redirect to add page with pre-filled data
+          const titleParam = encodeURIComponent(data.title)
+          const contentParam = encodeURIComponent(data.content)
+          router.push(`/add?title=${titleParam}&content=${contentParam}&isSmart=true`)
+          setShowSmartTodoModal(false)
+          setSmartTodoGoal('')
+        }
+      } catch (error) {
+        console.error('Error generating special todo:', error)
+      } finally {
+        setIsGeneratingTodos(false)
+      }
+    }
+
+    function handleToggleSelectTodo(todoId: number) {
+        const newSelected = new Set(selectedTodos)
+        if (newSelected.has(todoId)) {
+            newSelected.delete(todoId)
+        } else {
+            newSelected.add(todoId)
+        }
+        setSelectedTodos(newSelected)
+    }
+
+    function handleSelectAll() {
+        if (selectedTodos.size === filteredTodos.length) {
+            setSelectedTodos(new Set())
+        } else {
+            setSelectedTodos(new Set(filteredTodos.map((todo: any) => todo.id)))
+        }
+    }
+
+    function handleBulkDelete() {
+        selectedTodos.forEach(todoId => {
+            deleteTodo.mutate(todoId)
+        })
+        setSelectedTodos(new Set())
+    }
+
     function stripHtml(html: string) {
         const tmp = document.createElement('div')
         tmp.innerHTML = html
@@ -106,8 +209,9 @@ export default function TodoList() {
     
     const filteredTodos = useMemo(() => allTodos.filter((todo: any) => {
         if (filter === 'all') return true
-        if (filter === 'created') return !todo.sharedBy
+        if (filter === 'created') return !todo.sharedBy && !todo.isSmart
         if (filter === 'shared') return !!todo.sharedBy
+        if (filter === 'smart') return !!todo.isSmart
         return true
     }), [allTodos, filter])
 
@@ -190,7 +294,7 @@ export default function TodoList() {
             {/* Filter Buttons */}
             <div className="mt-10 px-4 mx-auto max-w-4xl">
                 <div className="flex item-center justify-between">
-                  <div className='flex gap-2 mb-6'>
+                  <div className='flex gap-2 mb-6 flex-wrap'>
                       <Button
                           variant={filter === 'all' ? 'default' : 'outline'}
                           size="sm"
@@ -215,11 +319,41 @@ export default function TodoList() {
                       >
                           Shared with me
                       </Button>
+                      <Button
+                          variant={filter === 'smart' ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setFilter('smart')}
+                          className="cursor-pointer"
+                      >
+                          Smart AI
+                      </Button>
+                      {filteredTodos.length > 0 && (
+                          <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleSelectAll}
+                              className="cursor-pointer"
+                          >
+                              {selectedTodos.size === filteredTodos.length ? 'Deselect All' : 'Select All'}
+                          </Button>
+                      )}
                   </div>
-                       {/*  add todo */}
-                    <Button onClick={() => setIsAdding(prev => !prev)} className='hidden sm:flex items-center justify-between'>
-                      Add ToDo<FilePlus  className='text-green-600 font-semibold'/>
-                    </Button>
+                  <div className='flex gap-2'>
+                      {selectedTodos.size > 0 && (
+                          <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={handleBulkDelete}
+                              className="cursor-pointer"
+                          >
+                              <Delete className="w-4 h-4 mr-2" />
+                              Delete ({selectedTodos.size})
+                          </Button>
+                      )}
+                      <Button onClick={() => setShowOptionsModal(true)} className='hidden sm:flex items-center justify-between'>
+                          Add ToDo<FilePlus  className='text-green-600 font-semibold'/>
+                        </Button>
+                  </div>
                 </div>
             </div>
 
@@ -231,9 +365,32 @@ export default function TodoList() {
             >
               {filteredTodos.length > 0 && filteredTodos.map((todo: any, index: number) => (
                 <motion.div key={todo.id} custom={index} variants={itemVariants} className="h-full">
-                  <Card className='shadow-lg rounded-xl p-4 flex flex-col gap-3 relative h-full'>
+                  <Card className={`shadow-lg rounded-xl p-4 flex flex-col gap-3 relative h-full ${selectedTodos.has(todo.id) ? 'border-2 border-blue-500 bg-blue-50' : ''} ${todo.isSmart ? 'border-2 border-green-500 bg-gradient-to-br from-green-50 to-white' : ''}`}>
+                    {todo.isSmart && (
+                      <div className="absolute top-2 right-2">
+                        <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center" title="AI Generated">
+                          <Sparkles className="w-4 h-4 text-white" />
+                        </div>
+                      </div>
+                    )}
                     <div className='flex items-center justify-between flex-shrink-0'>
-                      <h3 className='text-xl font-semibold flex items-center gap-2 line-clamp-1'>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="cursor-pointer scale-60 absolute top-1 left-1"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleToggleSelectTodo(todo.id)
+                          }}
+                        >
+                          {selectedTodos.has(todo.id) ? (
+                            <div className="w-5 h-5 bg-blue-500 rounded flex items-center justify-center">
+                              <div className="w-3 h-3 bg-white rounded-sm" />
+                            </div>
+                          ) : (
+                            <div className="w-5 h-5 border-2 border-gray-300 rounded" />
+                          )}
+                        </div>
+                        <h3 className='text-xl font-semibold flex items-center gap-2 line-clamp-1'>
                         {todo.title.split(' ')[0] + (todo.title.split(' ').length > 1 ? '...' : '')}
                         <span title={todo.completed ? 'completed' : 'pending'}>{
                         todo.completed ? <CloudCheck className='scale-60 text-green-500 font-bold mt-[-10px] ml-[-7px]'/>
@@ -258,6 +415,7 @@ export default function TodoList() {
                           </span>
                         )}
                       </h3>
+                      </div>
                       <Button
                       title='todo setting'
                         variant={'default'}
@@ -431,6 +589,114 @@ export default function TodoList() {
                 </motion.div>
               ))}
             </motion.div>
+
+            {/* Smart Todo Modal */}
+            {showSmartTodoModal && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100" onClick={() => setShowSmartTodoModal(false)}>
+                <div className="bg-white shadow-2xl rounded-lg py-4 px-6 w-96" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-lg">Smart Todo Generator</h3>
+                    <button onClick={() => setShowSmartTodoModal(false)} className="cursor-pointer text-gray-500 hover:text-gray-700">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <input
+                      type="text"
+                      placeholder="Enter your goal (e.g., Learn React in 5 days)"
+                      value={smartTodoGoal}
+                      onKeyDown={(e) => e.key === 'Enter' ? handleGenerateSmartTodos() : null}
+                      onChange={(e) => setSmartTodoGoal(e.target.value)}
+                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleGenerateSmartTodos}
+                        disabled={isGeneratingTodos || !smartTodoGoal.trim()}
+                        className="flex-1 cursor-pointer"
+                        variant="outline"
+                      >
+                        {isGeneratingTodos ? 'Generating...' : 'Generate List'}
+                      </Button>
+                      <Button
+                        onClick={handleGenerateSpecialTodo}
+                        disabled={isGeneratingTodos || !smartTodoGoal.trim()}
+                        className="flex-1 cursor-pointer"
+                        variant="default"
+                      >
+                        {isGeneratingTodos ? 'Generating...' : 'Generate Special'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Options Modal */}
+            {showOptionsModal && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 flex items-center justify-center z-100" 
+                onClick={() => setShowOptionsModal(false)}
+              >
+                <motion.div 
+                  initial={{ scale: 0.9, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  className="bg-white shadow-2xl rounded-2xl p-8 w-96" 
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="font-bold text-2xl text-gray-800">Add Todo</h3>
+                    <button onClick={() => setShowOptionsModal(false)} className="cursor-pointer text-gray-500 hover:text-gray-700 transition-colors">
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+                  <div className="flex flex-col gap-4">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setShowOptionsModal(false)
+                        setIsAdding(true)
+                      }}
+                      className="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl p-5 shadow-lg transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                          <Columns3Cog className="w-6 h-6" />
+                        </div>
+                        <div className="text-left">
+                          <h4 className="font-semibold text-lg">Custom Todo</h4>
+                          <p className="text-blue-100 text-sm">Create your own todo manually</p>
+                        </div>
+                      </div>
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setShowOptionsModal(false)
+                        setShowSmartTodoModal(true)
+                      }}
+                      className="group relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl p-5 shadow-lg transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                          <ArrowRight className="w-6 h-6" />
+                        </div>
+                        <div className="text-left">
+                          <h4 className="font-semibold text-lg">Smart Todo</h4>
+                          <p className="text-green-100 text-sm">Let AI generate todos for you</p>
+                        </div>
+                      </div>
+                    </motion.button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
         </div>
     )
 }
