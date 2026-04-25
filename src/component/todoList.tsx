@@ -11,6 +11,8 @@ import { ClipboardClock, CloudCheck, Delete, EllipsisVertical, FilePenLine, X, S
 import { useAuth } from '@/context/useContext'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/component/Toast'
+import { useSocket } from '@/hooks/useSocket'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function TodoList() {
     const router = useRouter()
@@ -23,6 +25,8 @@ export default function TodoList() {
     const shareTodo = useShareTodo(user)
     const unshareTodo = useUnshareTodo(user)
     const { mutate: addTodo } = useAddTodo(user)
+    const socket = useSocket()
+    const queryClient = useQueryClient()
     const [isAdding, setIsAdding] = useState(false)
     const [selectedTodo, setSelectedTodo] = useState<string | null>(null)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
@@ -237,6 +241,23 @@ export default function TodoList() {
         currentPage * itemsPerPage
     )
 
+        // Listen for auto-completed todos via Socket.io
+    useEffect(() => {
+        if (!socket) return
+
+        socket.on('todo_auto_completed', (data: any) => {
+            console.log('Todo auto-completed:', data)
+            // Refresh todo data to show updated status
+            queryClient.invalidateQueries({ queryKey: ['user-todo', user?.id] })
+            queryClient.invalidateQueries({ queryKey: ['shared-todos', user?.id] })
+            showToast('info', 'Todo Auto-Completed', data.message || 'Todo was automatically marked as completed')
+        })
+
+        return () => {
+            socket.off('todo_auto_completed')
+        }
+    }, [socket, user?.id, queryClient, showToast])
+
     useEffect(() => {
         const updateCountdowns = () => {
             const now = new Date().getTime()
@@ -280,7 +301,7 @@ export default function TodoList() {
         return (
             <>
                 {isAdding && <AddToDo setIsAdding={setIsAdding} seteTodoD={setTodoData} />}
-                <Card className='shadow-lg rounded-lg w-40 px-8 flex justify-center border-0 flex-col items-center gap-2 absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2'>
+                <Card className='mt-20 sm:mt-30 shadow-lg rounded-lg w-40 px-8 flex justify-center border-0 flex-col items-center gap-2 absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2'>
                   <CardTitle className='font-semibold'>
                      Loding..
                   </CardTitle>

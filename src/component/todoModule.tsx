@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { X } from "lucide-react"
+import { X, Clock } from "lucide-react"
 import { useAddTodo, useUpdateTodo } from '@/hooks/todoHook'
 import { useRef, useEffect, useState } from "react"
 import { useAuth } from '@/context/useContext'
@@ -19,6 +19,7 @@ export default function AddToDo({ setIsAdding, todoD, seteTodoD }: { setIsAdding
     const contentRef = useRef<HTMLTextAreaElement>(null)
     const isEditMode = !!todoD
     const [selectedDate, setSelectedDate] = useState<Date | null>(todoD?.completedAt ? new Date(todoD.completedAt) : null)
+    const [autoChangeStatus, setAutoChangeStatus] = useState(todoD?.autoChangeStatus || false)
 
     useEffect(() => {
         if (todoD && titleRef.current && contentRef.current) {
@@ -26,8 +27,10 @@ export default function AddToDo({ setIsAdding, todoD, seteTodoD }: { setIsAdding
             contentRef.current.value = todoD.content || ''
             if (todoD.completedAt) {
                 setSelectedDate(new Date(todoD.completedAt))
+                setAutoChangeStatus(todoD.autoChangeStatus || false)
             } else {
                 setSelectedDate(null)
+                setAutoChangeStatus(false)
             }
         }
     }, [todoD])
@@ -38,6 +41,7 @@ export default function AddToDo({ setIsAdding, todoD, seteTodoD }: { setIsAdding
         }
         
         const completedAt = selectedDate ? selectedDate.toISOString() : null
+        const autoChange = selectedDate ? autoChangeStatus : false
         
         if (isEditMode && todoD?.id) {
             updateTodo({
@@ -45,14 +49,16 @@ export default function AddToDo({ setIsAdding, todoD, seteTodoD }: { setIsAdding
                 data: {
                     title: titleRef.current?.value,
                     content: contentRef.current?.value,
-                    completedAt
+                    completedAt,
+                    autoChangeStatus: autoChange
                 }
             })
         } else {
             addTodo({
               title: titleRef.current?.value,
               content: contentRef.current?.value,
-              completedAt
+              completedAt,
+              autoChangeStatus: autoChange
             })
         }
         setIsAdding(false)
@@ -81,6 +87,21 @@ export default function AddToDo({ setIsAdding, todoD, seteTodoD }: { setIsAdding
                  className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
                  isClearable
                />
+               {selectedDate && (
+                   <div className="flex items-center gap-2">
+                       <input
+                           type="checkbox"
+                           id="autoChangeStatus"
+                           checked={autoChangeStatus}
+                           onChange={(e) => setAutoChangeStatus(e.target.checked)}
+                           className="w-4 h-4 cursor-pointer"
+                       />
+                       <label htmlFor="autoChangeStatus" className="text-sm text-gray-600 cursor-pointer flex items-center gap-1">
+                           <Clock className="w-4 h-4" />
+                           Auto-mark as completed when overdue
+                       </label>
+                   </div>
+               )}
                <Button title="submit button" onClick={handleSubmit}>{isEditMode ? 'Update' : 'Add'}</Button>
             </div>
           </div>
