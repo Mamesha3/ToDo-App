@@ -4,16 +4,18 @@ import { useAuth } from '@/context/useContext'
 import { useGetUserTodo, useGetSharedTodos } from '@/hooks/todoHook'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { User, Mail, CheckCircle, Clock, LogOut, X } from 'lucide-react'
+import { User, Mail, CheckCircle, Clock, LogOut, X, Volume2, VolumeX } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Navbar from '@/component/navbar'
 import { updateUserProfile } from '@/lib/api'
+import { useToast } from '@/component/Toast'
 
 export default function ProfilePage() {
     const { user, logout, refresh, updateUser } = useAuth()
     const { data, isLoading } = useGetUserTodo(user)
     const { data: sharedData } = useGetSharedTodos(user)
+    const { soundEnabled, toggleSound, showToast } = useToast()
     const router = useRouter()
     const [isEditing, setIsEditing] = useState(false)
     const nameRef = useRef<HTMLInputElement>(null)
@@ -47,10 +49,11 @@ export default function ProfilePage() {
                 // Fallback to refresh if user not in response
                 await refresh()
             }
+            showToast('success', 'Profile Updated', 'Your profile has been updated successfully')
             setIsEditing(false)
         } catch (error) {
             console.error('Failed to update profile:', error)
-            alert('Failed to update profile. Please try again.')
+            showToast('error', 'Update Failed', 'Failed to update profile. Please try again.')
         }
     }
 
@@ -184,6 +187,14 @@ export default function ProfilePage() {
                             <Mail className="w-4 h-4 mr-3" />
                             Change Email
                         </Button> */}
+                        <Button 
+                            variant="ghost" 
+                            className="cursor-pointer w-full justify-start h-10 text-slate-600 hover:text-slate-800 hover:bg-slate-50"
+                            onClick={toggleSound}
+                        >
+                            {soundEnabled ? <Volume2 className="w-4 h-4 mr-3" /> : <VolumeX className="w-4 h-4 mr-3" />}
+                            {soundEnabled ? 'Sound On' : 'Sound Off'}
+                        </Button>
                         <Button 
                             variant="ghost" 
                             className="cursor-pointer w-full justify-start h-10 text-slate-600 hover:text-slate-800 hover:bg-slate-50"

@@ -192,7 +192,7 @@ export default function ChatBox({ receiverId, receiverName, onBack }: { receiver
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="sm:h-10 border-t border-gray-200/50 p-4 bg-white/80 backdrop-blur-sm"
+                className="sm:h-5 border-t border-gray-200/50 p-4 bg-white/80 backdrop-blur-sm"
             >
                 <div className="flex gap-3 items-center">
                     <input

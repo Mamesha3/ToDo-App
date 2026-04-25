@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/context/useContext'
 import { motion } from 'framer-motion'
 import { ImagePlus, Download, Sparkles, Loader2, Eye, X, History, Trash2, CheckSquare, Square } from 'lucide-react'
+import { useToast } from '@/component/Toast'
 
 export default function ImageGeneratorPage() {
     const [prompt, setPrompt] = useState('')
@@ -17,6 +18,7 @@ export default function ImageGeneratorPage() {
     const [isSelectionMode, setIsSelectionMode] = useState(false)
     const [remainingImages, setRemainingImages] = useState<number>(10)
     const { user } = useAuth()
+    const { showToast } = useToast()
 
     // LocalStorage functions
     const compressImage = (base64: string, maxWidth: number = 400, quality: number = 0.7): Promise<string> => {
@@ -133,6 +135,7 @@ export default function ImageGeneratorPage() {
                 setRemainingImages(data.remaining || 10)
                 // Save to localStorage without blocking rendering
                 saveToHistory(data.images, prompt.trim())
+                showToast('success', 'Image Generated!', `Successfully generated ${data.images.length} image${data.images.length > 1 ? 's' : ''}`)
             } else if (response.status === 429) {
                 throw new Error(data.msg || 'Daily image limit exceeded')
             } else {
@@ -140,6 +143,11 @@ export default function ImageGeneratorPage() {
             }
         } catch (err: any) {
             setError(err.message || 'An error occurred while generating the image')
+            if (err.message.includes('limit')) {
+                showToast('warning', 'Limit Reached', err.message || 'Daily image limit exceeded')
+            } else {
+                showToast('error', 'Generation Failed', err.message || 'Failed to generate image')
+            }
         } finally {
             setIsGenerating(false)
         }

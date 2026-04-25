@@ -22,6 +22,7 @@ import { useState, useRef } from "react"
 import { useAuth } from "@/context/useContext"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
+import { useToast } from "@/component/Toast"
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     const [isShowPass, setShowPass] = useState(false)
@@ -37,6 +38,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     const emailRef = useRef<HTMLInputElement>(null)
     const { register } = useAuth()
     const router = useRouter()
+    const { showToast } = useToast()
     function validatePassword(password: string): string | null {
         if (password.length < 8) {
             return "Password must be at least 8 characters long"
@@ -101,6 +103,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         setIsLoading(true)
         try {
             await register({ name, email, password })
+            showToast('success', 'Account Created!', 'Your account has been created successfully')
             setIsSuccess(true)
             setTimeout(() => {
                 router.push("/login")

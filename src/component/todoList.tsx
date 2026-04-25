@@ -10,12 +10,14 @@ import { Button } from '@/components/ui/button'
 import { ClipboardClock, CloudCheck, Delete, EllipsisVertical, FilePenLine, X, Share2, Users, UserMinus, Eye, FilePlus, Clock, ArrowRight, Plus, Columns3Cog, Sparkles } from 'lucide-react'
 import { useAuth } from '@/context/useContext'
 import { useRouter } from 'next/navigation'
+import { useToast } from '@/component/Toast'
 
 export default function TodoList() {
     const router = useRouter()
     const { user } = useAuth()
     const { data, isLoading } = useGetUserTodo(user)
     const { data: sharedData } = useGetSharedTodos(user)
+    const { showToast } = useToast()
     const complatedToDo = useTodoCompleted(user)
     const deleteTodo = useDeleteTodo(user)
     const shareTodo = useShareTodo(user)
@@ -35,6 +37,8 @@ export default function TodoList() {
     const [todoData, setTodoData] = useState<any | null>(null)
     const [timeRemaining, setTimeRemaining] = useState<Record<number, string>>({})
     const [selectedTodos, setSelectedTodos] = useState<Set<number>>(new Set())
+    const [currentPage, setCurrentPage] = useState(1)
+    const [itemsPerPage] = useState(9)
     const MotionButton = motion(Button)
 
     const containerVariants = {
@@ -114,11 +118,12 @@ export default function TodoList() {
         const data = await response.json()
 
         if (response.status === 429) {
-          alert(data.msg || 'You reached your todays limit')
+          showToast('warning', 'Limit Reached', data.msg || 'You reached your daily limit')
           return
         }
 
         if (data.todos && Array.isArray(data.todos)) {
+          showToast('success', 'Todos Generated', `Generated ${data.todos.length} smart todos`)
           // Redirect to review page with generated todos
           const todosParam = encodeURIComponent(JSON.stringify(data.todos))
           router.push(`/smart-todos?todos=${todosParam}`)
@@ -127,6 +132,7 @@ export default function TodoList() {
         }
       } catch (error) {
         console.error('Error generating todos:', error)
+        showToast('error', 'Generation Failed', 'Failed to generate smart todos')
       } finally {
         setIsGeneratingTodos(false)
       }
@@ -147,11 +153,12 @@ export default function TodoList() {
         const data = await response.json()
 
         if (response.status === 429) {
-          alert(data.msg || 'You reached your todays limit')
+          showToast('warning', 'Limit Reached', data.msg || 'You reached your daily limit')
           return
         }
 
         if (data.title && data.content) {
+          showToast('success', 'Special Todo Generated', 'AI generated a special todo for you')
           // Redirect to add page with pre-filled data
           const titleParam = encodeURIComponent(data.title)
           const contentParam = encodeURIComponent(data.content)
@@ -161,6 +168,7 @@ export default function TodoList() {
         }
       } catch (error) {
         console.error('Error generating special todo:', error)
+        showToast('error', 'Generation Failed', 'Failed to generate special todo')
       } finally {
         setIsGeneratingTodos(false)
       }
@@ -185,10 +193,12 @@ export default function TodoList() {
     }
 
     function handleBulkDelete() {
+        const count = selectedTodos.size
         selectedTodos.forEach(todoId => {
             deleteTodo.mutate(todoId)
         })
         setSelectedTodos(new Set())
+        showToast('success', 'Todos Deleted', `Successfully deleted ${count} todo${count > 1 ? 's' : ''}`)
     }
 
     function stripHtml(html: string) {
@@ -214,6 +224,18 @@ export default function TodoList() {
         if (filter === 'smart') return !!todo.isSmart
         return true
     }), [allTodos, filter])
+
+    // Reset page when filter changes
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [filter])
+
+    // Calculate pagination
+    const totalPages = Math.ceil(filteredTodos.length / itemsPerPage)
+    const paginatedTodos = filteredTodos.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    )
 
     useEffect(() => {
         const updateCountdowns = () => {
@@ -363,7 +385,7 @@ export default function TodoList() {
               initial="hidden"
               animate="visible"
             >
-              {filteredTodos.length > 0 && filteredTodos.map((todo: any, index: number) => (
+              {paginatedTodos.length > 0 && paginatedTodos.map((todo: any, index: number) => (
                 <motion.div key={todo.id} custom={index} variants={itemVariants} className="h-full">
                   <Card className={`shadow-lg rounded-xl p-4 flex flex-col gap-3 relative h-full ${selectedTodos.has(todo.id) ? 'border-2 border-blue-500 bg-blue-50' : ''} ${todo.isSmart ? 'border-2 border-green-500 bg-gradient-to-br from-green-50 to-white' : ''}`}>
                     {todo.isSmart && (
@@ -589,6 +611,43 @@ export default function TodoList() {
                 </motion.div>
               ))}
             </motion.div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="mt-6 px-4 mx-auto max-w-4xl flex items-center justify-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        className="cursor-pointer"
+                    >
+                        Previous
+                    </Button>
+                    <div className="flex gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <Button
+                                key={page}
+                                variant={currentPage === page ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => setCurrentPage(page)}
+                                className="cursor-pointer w-10"
+                            >
+                                {page}
+                            </Button>
+                        ))}
+                    </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                        className="cursor-pointer"
+                    >
+                        Next
+                    </Button>
+                </div>
+            )}
 
             {/* Smart Todo Modal */}
             {showSmartTodoModal && (

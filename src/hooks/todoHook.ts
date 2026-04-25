@@ -45,7 +45,7 @@ export const useUpdateTodo = (user: any) => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["user-todo", user?.id] })
             queryClient.invalidateQueries({ queryKey: ["shared-todos", user?.id] })
-            showToast('success', 'Todo Updated', 'Your todo has been updated successfully')
+            showToast('info', 'Todo Updated', 'Your todo has been updated successfully')
         }
     })
 }
@@ -60,7 +60,7 @@ export const useTodoCompleted = (user: any) => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["user-todo", user?.id] })
             queryClient.invalidateQueries({ queryKey: ["shared-todos", user?.id] })
-            showToast('success', 'Status Changed', 'Todo status has been updated successfully')
+            showToast('info', 'Status Changed', 'Todo status has been updated successfully')
         }
     })
 }
@@ -75,7 +75,7 @@ export const useDeleteTodo = (user: any) => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["user-todo", user?.id] })
             queryClient.invalidateQueries({ queryKey: ["shared-todos", user?.id] })
-            showToast('success', 'Todo Deleted', 'Your todo has been deleted successfully')
+            showToast('warning', 'Todo Deleted', 'Your todo has been deleted successfully')
         }
     })
 }
@@ -105,7 +105,7 @@ export const useUnshareTodo = (user: any) => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["user-todo", user?.id] })
             queryClient.invalidateQueries({ queryKey: ["shared-todos", user?.id] })
-            showToast('success', 'Todo Unshared', 'Your todo has been unshared successfully')
+            showToast('info', 'Todo Unshared', 'Your todo has been unshared successfully')
         }
     })
 }

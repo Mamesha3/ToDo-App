@@ -15,12 +15,19 @@ export default function MessagesPage() {
     const [chatMode, setChatMode] = useState<'user' | 'ai'>('user')
     const { user } = useAuth()
 
-    // Check URL parameter for AI mode
+    // Check URL parameter for AI mode or direct user conversation
     useEffect(() => {
         const mode = searchParams.get('mode')
+        const userId = searchParams.get('userId')
+        const userName = searchParams.get('userName')
+
         if (mode === 'ai') {
             setChatMode('ai')
             setSelectedUserId(null)
+        } else if (userId && userName) {
+            setSelectedUserId(userId)
+            setSelectedUserName(decodeURIComponent(userName))
+            setChatMode('user')
         }
     }, [searchParams])
 

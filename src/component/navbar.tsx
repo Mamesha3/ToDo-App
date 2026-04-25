@@ -2,7 +2,7 @@
 
 // import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { LogOut, UserPen, Home, MessageSquare, MessageCirclePlus, ImagePlus, LogIn, UserPlus } from "lucide-react";
+import { LogOut, UserPen, Home, MessageSquare, MessageCirclePlus, ImagePlus, LogIn, UserPlus, Search } from "lucide-react";
 import { useAuth } from "@/context/useContext";
 import { motion } from "framer-motion";
 
@@ -39,6 +39,10 @@ export default function Navbar() {
             className={`cursor-pointer flex gap-2 items-center rounded-lg py-2 px-4 active:scale-95 transition-all duration-400 ${pathname === '/' ? 'bg-white text-black shadow-sm' : 'hover:shadow-sm hover:text-black hover:bg-white'}`}
             onClick={() => router.push('/')}
           ><Home />Home</button>
+          <button
+            className={`cursor-pointer flex gap-2 items-center rounded-lg py-2 px-4 active:scale-95 transition-all duration-400 ${pathname === '/search' ? 'bg-white text-black shadow-sm' : 'hover:shadow-sm hover:text-black hover:bg-white'}`}
+            onClick={() => router.push('/search')}
+          ><Search />Search</button>
           <button
             className={`cursor-pointer flex gap-2 items-center rounded-lg py-2 px-4 active:scale-95 transition-all duration-400 ${pathname === '/messages' ? 'bg-white text-black shadow-sm' : 'hover:shadow-sm hover:text-black hover:bg-white'}`}
             onClick={() => router.push('/messages')}
@@ -88,15 +92,17 @@ export default function Navbar() {
             <Home className="w-6 h-6" />
             {/* <span className="text-xs">Home</span> */}
           </motion.button>
+
           <motion.button
             whileTap={{ scale: 0.9 }}
-            title="Messages"
-            onClick={() => router.push('/messages')}
-            className={`cursor-pointer flex flex-col items-center gap-1 ${pathname === '/messages' ? 'text-blue-500' : 'text-gray-500'}`}
+            title="Search"
+            onClick={() => router.push('/search')}
+            className={`cursor-pointer flex flex-col items-center gap-1 ${pathname === '/search' ? 'text-blue-500' : 'text-gray-500'}`}
           >
-            <MessageSquare className="w-6 h-6" />
-            {/* <span className="text-xs">Messages</span> */}
+            <Search className="w-6 h-6" />
+            {/* <span className="text-xs">Search</span> */}
           </motion.button>
+
           <motion.button
             whileTap={{ scale: 0.9 }}
             title="Add Todo"
@@ -108,6 +114,16 @@ export default function Navbar() {
           </motion.button>
           <motion.button
             whileTap={{ scale: 0.9 }}
+            title="Messages"
+            onClick={() => router.push('/messages')}
+            className={`cursor-pointer flex flex-col items-center gap-1 ${pathname === '/messages' ? 'text-blue-500' : 'text-gray-500'}`}
+          >
+            <MessageSquare className="w-6 h-6" />
+            {/* <span className="text-xs">Messages</span> */}
+          </motion.button>
+          
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             title="Ai Image"
             onClick={() => router.push('/image-generator')}
             className={`cursor-pointer flex flex-col items-center gap-1 ${pathname === '/image-generator' ? 'text-blue-500' : 'text-gray-500'}`}
@@ -115,6 +131,7 @@ export default function Navbar() {
             <ImagePlus className="w-6 h-6" />
             {/* <span className="text-xs">AI Image</span> */}
           </motion.button>
+          
           <motion.button
             whileTap={{ scale: 0.9 }}
             title="Profile"

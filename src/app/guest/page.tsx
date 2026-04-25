@@ -106,24 +106,52 @@ export default function GuestPage() {
                             Boost your productivity with AI-powered task management, real-time collaboration, and intelligent features.
                         </motion.p>
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
                             transition={{ delay: 0.6, duration: 0.8 }}
-                            className="flex flex-col sm:flex-row gap-4 justify-center"
+                            className="max-w-4xl mx-auto"
                         >
-                            <Link
-                                href="/signup"
-                                className="group bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
-                            >
-                                Get Started Free
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                            <Link
-                                href="/login"
-                                className="bg-white text-gray-800 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200"
-                            >
-                                Login
-                            </Link>
+                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-200">
+                                <h3 className="text-2xl font-bold text-gray-900 mb-4">Why Choose Smart Todo App?</h3>
+                                <div className="grid md:grid-cols-2 gap-6 text-gray-700">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                            <CheckCircle className="w-5 h-5 text-green-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold mb-1">AI-Powered Intelligence</h4>
+                                            <p className="text-sm">Generate smart todo lists and special tasks using advanced AI technology</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                            <Users className="w-5 h-5 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold mb-1">Team Collaboration</h4>
+                                            <p className="text-sm">Share todos with teammates and work together in real-time</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                            <Clock className="w-5 h-5 text-purple-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold mb-1">Smart Reminders</h4>
+                                            <p className="text-sm">Set due dates with live countdown timers to never miss deadlines</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                            <ImagePlus className="w-5 h-5 text-pink-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold mb-1">AI Image Generation</h4>
+                                            <p className="text-sm">Create stunning images with AI for your projects and presentations</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </motion.div>
                     </motion.div>
                 </div>
