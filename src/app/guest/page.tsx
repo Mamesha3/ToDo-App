@@ -259,7 +259,7 @@ export default function GuestPage() {
             {/* Footer */}
             <div className="bg-gray-900 text-white py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <p className="text-gray-400">© 2024 Smart Todo App. All rights reserved.</p>
+                    <p className="text-gray-400">© 2026 <span className="text-blue-400 italic">M</span><span className='text-xl font-bold'>Studio</span> Smart Todo App. All rights reserved.</p>
                 </div>
             </div>
         </div>
