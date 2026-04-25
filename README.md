@@ -1,36 +1,153 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ToDo App Client
+
+A modern, feature-rich todo application built with Next.js, featuring real-time messaging, AI-powered todo generation, and collaborative sharing capabilities.
+
+## Features
+
+- **Todo Management**
+  - Create, edit, delete, and complete todos
+  - Set due dates with countdown timers
+  - Filter todos by type (All, Created, Shared, Smart AI)
+  - Bulk selection and deletion
+  - Pagination for large todo lists
+
+- **AI-Powered Features**
+  - Smart Todo Generator: Generate todo lists from goals using AI
+  - Special Todo: Create individual AI-generated todos
+  - AI Chat Assistant: Get help with your todos and tasks
+  - Daily limits on AI features
+
+- **Collaboration**
+  - Share todos with other users
+  - View and manage shared todos
+  - Real-time messaging with other users
+  - Search for users and todos
+
+- **User Experience**
+  - Responsive design (mobile and desktop)
+  - Smooth animations with Framer Motion
+  - Toast notifications with different sounds for actions
+  - Modern UI with Tailwind CSS and shadcn/ui components
+
+## Tech Stack
+
+- **Frontend Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS 4
+- **UI Components**: shadcn/ui, Radix UI
+- **State Management**: Redux Toolkit, TanStack Query
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
+- **Real-time**: Socket.io Client
+- **HTTP Client**: Axios
+
+## Prerequisites
+
+- Node.js 18+ installed
+- Backend server running (see [ToDo-Api](https://github.com/Mamesha3/ToDo-Api))
+- PostgreSQL database configured
 
 ## Getting Started
 
-First, run the development server:
+1. **Install dependencies**
+
+```bash
+npm install
+```
+
+2. **Configure environment variables**
+
+Create a `.env.local` file in the root directory:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
+
+3. **Run the development server**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Available Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run lint` - Run ESLint
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/              # Next.js app router pages
+│   ├── add/          # Add todo page
+│   ├── guest/        # Guest landing page
+│   ├── image-generator/  # AI image generation
+│   ├── login/        # Login page
+│   ├── messages/     # Messaging system
+│   ├── profile/      # User profile
+│   ├── search/       # Search page
+│   ├── signup/       # Signup page
+│   └── smart-todos/  # Smart todo review page
+├── components/       # Reusable components
+│   ├── ChatBox.tsx   # Chat interface
+│   ├── ConversationList.tsx
+│   ├── todoList.tsx  # Todo list with pagination
+│   └── ...
+├── context/          # React context providers
+├── hooks/            # Custom React hooks
+├── lib/              # Utility functions and API calls
+└── component/        # Additional components
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Integration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The client communicates with the backend API at `http://localhost:5000` by default. The API endpoints include:
 
-## Deploy on Vercel
+- Authentication: `/api/auth/login`, `/api/auth/signup`
+- Todos: `/api/todo/*`
+- Messages: `/api/message/*`
+- Users: `/api/user/*`
+- Search: `/api/search/*`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Key Features Explained
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Smart Todo Generation
+Users can generate todo lists or individual todos using AI by providing a goal. The AI breaks down the goal into actionable tasks.
+
+### Real-time Messaging
+Built with Socket.io, allowing users to send and receive messages in real-time with other users.
+
+### Todo Sharing
+Users can share their todos with other users, who can then view and interact with them.
+
+### Search Functionality
+Search across personal todos and other users with case-insensitive partial matching.
+
+## Deployment
+
+The easiest way to deploy is using [Vercel](https://vercel.com/new):
+
+```bash
+npm run build
+vercel
+```
+
+Make sure to set the `NEXT_PUBLIC_API_URL` environment variable to your production API URL.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+ISC
+
+## Links
+
+- **Backend API**: [ToDo-Api](https://github.com/Mamesha3/ToDo-Api)
+- **Next.js Documentation**: [https://nextjs.org/docs](https://nextjs.org/docs)
+
