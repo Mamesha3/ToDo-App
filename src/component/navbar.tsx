@@ -20,15 +20,14 @@ export default function Navbar() {
         </h1>
 
         {/* Desktop navigation */}
-        {pathname === '/guest' ? 
-          
+        {pathname === '/guest' ?
         <div className="flex items-center justify-around">
           <button
-            className={`cursor-pointer flex gap-2 items-center rounded-lg py-2 px-4 active:scale-95 transition-all duration-400 ${pathname === '/login' ? 'bg-white text-black shadow-sm' : 'hover:shadow-sm hover:text-black hover:bg-white'}`}
+            className="cursor-pointer flex gap-2 items-center rounded-lg py-2 px-4 active:scale-95 transition-all duration-400 hover:shadow-sm hover:text-black hover:bg-white"
             onClick={() => router.push('/login')}
           ><LogIn />Login</button>
           <button
-            className={`cursor-pointer flex gap-2 items-center rounded-lg py-2 px-4 active:scale-95 transition-all duration-400 ${pathname === '/signup' ? 'bg-white text-black shadow-sm' : 'hover:shadow-sm hover:text-black hover:bg-white'}`}
+            className="cursor-pointer flex gap-2 items-center rounded-lg py-2 px-4 active:scale-95 transition-all duration-400 hover:shadow-sm hover:text-black hover:bg-white"
             onClick={() => router.push('/signup')}
           ><UserPlus />Signup</button>
         </div>
@@ -63,7 +62,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Bottom Navigation */}
-      {pathname === '/guest' ? 
+      {pathname === '/guest' ?
        <div className="md:hidden flex items-center justify-between p-2 fixed top-0 left-0 right-0 z-10 bg-blue-500 border-b border-gray-200 shadow-sm">
          <h1 onClick={() => router.push('/')} className="cursor-pointer text-3xl font-bold text-slate-300 text-shadow-2xs">
             <span className="italic text-2xl text-slate-400">M</span>Studio
@@ -71,11 +70,11 @@ export default function Navbar() {
          
           <div className="font-semibold flex items-center gap-3">
               <button
-                className={`cursor-pointer flex gap-2 items-center rounded-lg py-2 px-4 active:scale-95 transition-all duration-400 ${pathname === '/login' ? 'bg-white text-black shadow-sm' : 'hover:shadow-sm hover:text-black hover:bg-white'}`}
+                className="cursor-pointer flex gap-2 items-center rounded-lg py-2 px-4 active:scale-95 transition-all duration-400 hover:shadow-sm hover:text-black hover:bg-white"
                 onClick={() => router.push('/login')}
               ><LogIn />Login</button>
             <button
-              className={`cursor-pointer flex gap-2 items-center rounded-lg py-2 px-4 active:scale-95 transition-all duration-400 ${pathname === '/signup' ? 'bg-white text-black shadow-sm' : 'hover:shadow-sm hover:text-black hover:bg-white'}`}
+              className="cursor-pointer flex gap-2 items-center rounded-lg py-2 px-4 active:scale-95 transition-all duration-400 hover:shadow-sm hover:text-black hover:bg-white"
               onClick={() => router.push('/signup')}
             ><UserPlus />Signup</button>
           </div>
