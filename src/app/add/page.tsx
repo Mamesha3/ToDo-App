@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, X } from "lucide-react"
+import { ArrowLeft, X, Clock } from "lucide-react"
 import { useAddTodo } from '@/hooks/todoHook'
 import { useRef, useState, useEffect } from "react"
 import { useAuth } from '@/context/useContext'
@@ -20,6 +20,7 @@ export default function AddTodoPage() {
     const titleRef = useRef<HTMLInputElement>(null)
     const contentRef = useRef<HTMLTextAreaElement>(null)
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+    const [autoChangeStatus, setAutoChangeStatus] = useState(false)
     const [showSmartTodoModal, setShowSmartTodoModal] = useState(false)
     const [smartTodoGoal, setSmartTodoGoal] = useState('')
     const [isGeneratingTodos, setIsGeneratingTodos] = useState(false)
@@ -48,11 +49,13 @@ export default function AddTodoPage() {
         }
 
         const completedAt = selectedDate ? selectedDate.toISOString() : null
+        const autoChange = selectedDate ? autoChangeStatus : false
 
         addTodo({
           title: titleRef.current?.value,
           content: contentRef.current?.value,
           completedAt,
+          autoChangeStatus: autoChange,
           isSmart
         })
 
@@ -159,6 +162,21 @@ export default function AddTodoPage() {
                         className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm"
                         isClearable
                     />
+                    {selectedDate && (
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="autoChangeStatus"
+                                checked={autoChangeStatus}
+                                onChange={(e) => setAutoChangeStatus(e.target.checked)}
+                                className="w-4 h-4 cursor-pointer"
+                            />
+                            <label htmlFor="autoChangeStatus" className="text-sm text-gray-600 cursor-pointer flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                Auto-mark as completed when overdue
+                            </label>
+                        </div>
+                    )}
                     <Button onClick={handleSubmit} className="w-full cursor-pointer">Add Todo</Button>
                 </div>
 
